@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Gestión — Proyecto Musical</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #2a2a2a;
+    --border2: #333;
+    --text: #e8e4dc;
+    --text2: #888;
+    --text3: #555;
+    --accent: #c8a96e;
+    --accent2: #8b6b3d;
+    --green: #4a9e6e;
+    --green-bg: #0d1f16;
+    --amber: #c8853a;
+    --amber-bg: #1f160a;
+    --red: #9e4a4a;
+    --red-bg: #1f0d0d;
+    --blue: #4a7a9e;
+    --blue-bg: #0d1520;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* SIDEBAR */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  .global-progress {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .gp-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .gp-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .gp-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width .4s ease;
+  }
+
+  .nav { padding: 12px 0; flex: 1; }
+
+  .nav-phase {
+    padding: 6px 20px;
+    margin-bottom: 2px;
+  }
+
+  .nav-phase-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    color: var(--text3);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 8px 0 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .15s;
+    font-size: 13px;
+    color: var(--text2);
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--surface2); color: var(--accent); }
+
+  .nav-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border2);
+    min-width: 6px;
+  }
+
+  .nav-item.active .nav-dot { background: var(--accent); }
+
+  .nav-progress-mini {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    margin-left: auto;
+  }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    padding: 32px 40px;
+    max-width: 860px;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .phase-number {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: .1em;
+    padding: 4px 10px;
+    border: 1px solid var(--accent2);
+    border-radius: 3px;
+    white-space: nowrap;
+    margin-top: 3px;
+  }
+
+  .phase-title {
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--text);
+    letter-spacing: -.01em;
+    margin-bottom: 4px;
+  }
+
+  .phase-desc {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .phase-stats {
+    margin-left: auto;
+    text-align: right;
+    min-width: 80px;
+  }
+
+  .phase-pct {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .phase-pct-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: .08em;
+  }
+
+  /* SUBFASES */
+  .subfase {
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .subfase-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--surface);
+    cursor: pointer;
+    user-select: none;
+    transition: background .15s;
+  }
+
+  .subfase-header:hover { background: var(--surface2); }
+
+  .subfase-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .subfase-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+  }
+
+  .subfase-bar {
+    width: 60px;
+    height: 2px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .subfase-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width .3s;
+  }
+
+  .chevron-icon {
+    color: var(--text3);
+    font-size: 10px;
+    transition: transform .2s;
+    font-family: var(--mono);
+  }
+
+  .chevron-icon.open { transform: rotate(90deg); }
+
+  .subfase-body { display: none; }
+  .subfase-body.open { display: block; }
+
+  /* TAREAS */
+  .task-list { padding: 4px 0; }
+
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 18px;
+    border-top: 1px solid var(--border);
+    transition: background .1s;
+    cursor: pointer;
+  }
+
+  .task-item:hover { background: var(--surface2); }
+
+  .task-check {
+    width: 16px; height: 16px;
+    min-width: 16px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+    transition: all .15s;
+    font-size: 9px;
+  }
+
+  .task-item.done .task-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+
+  .task-content { flex: 1; }
+
+  .task-title {
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 2px;
+    transition: color .15s;
+  }
+
+  .task-item.done .task-title {
+    color: var(--text3);
+    text-decoration: line-through;
+  }
+
+  .task-note {
+    font-size: 11px;
+    color: var(--text3);
+    line-height: 1.5;
+  }
+
+  .task-tag {
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    white-space: nowrap;
+    margin-top: 3px;
+    display: inline-block;
+  }
+
+  .tag-warn { background: var(--amber-bg); color: var(--amber); border: 1px solid #3a2510; }
+  .tag-info { background: var(--blue-bg); color: var(--blue); border: 1px solid #102030; }
+  .tag-ok   { background: var(--green-bg); color: var(--green); border: 1px solid #103020; }
+  .tag-gray { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+
+  /* VAULT */
+  .vault-section {
+    margin-top: 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .vault-header {
+    padding: 14px 18px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+  }
+
+  .vault-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    flex: 1;
+    font-family: var(--mono);
+    letter-spacing: .05em;
+  }
+
+  .vault-body { display: none; padding: 16px 18px; }
+  .vault-body.open { display: block; }
+
+  .vault-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+
+  .vault-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+  }
+
+  .vault-item-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: .08em;
+    margin-bottom: 4px;
+  }
+
+  .vault-item-val {
+    font-size: 12px;
+    color: var(--text);
+    font-family: var(--mono);
+    word-break: break-all;
+  }
+
+  .vault-input-row {
+    display: grid;
+    grid-template-columns: 1fr 2fr auto;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  input, textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 12px;
+    outline: none;
+    transition: border .15s;
+  }
+
+  input:focus, textarea:focus { border-color: var(--accent2); }
+
+  button {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 14px;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .05em;
+  }
+
+  button:hover { background: var(--accent2); color: var(--text); border-color: var(--accent2); }
+  button.primary { background: var(--accent2); color: var(--text); border-color: var(--accent2); }
+  button.primary:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* NOTAS */
+  .notes-area {
+    width: 100%;
+    min-height: 80px;
+    resize: vertical;
+    margin-top: 8px;
+  }
+
+  /* PAGE VIEWS */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* OVERVIEW */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: .08em;
+    margin-bottom: 6px;
+  }
+
+  .stat-val {
+    font-size: 26px;
+    font-weight: 700;
+    font-family: var(--mono);
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  .stat-sub { font-size: 11px; color: var(--text3); }
+
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: border-color .15s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .phase-card:hover { border-color: var(--accent2); }
+
+  .phase-card-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .phase-card-info { flex: 1; }
+  .phase-card-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+  .phase-card-sub { font-size: 12px; color: var(--text2); }
+
+  .phase-card-bar-wrap { width: 100px; }
+  .phase-card-pct { font-family: var(--mono); font-size: 12px; color: var(--accent); text-align: right; margin-bottom: 4px; }
+  .phase-card-bar { height: 3px; background: var(--border); border-radius: 2px; }
+  .phase-card-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s; }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">PROYECTO MUSICAL</div>
+      <div class="logo-sub">sistema de gestión v1</div>
+    </div>
+    <div class="global-progress">
+      <div class="gp-label">
+        <span>PROGRESO TOTAL</span>
+        <span id="global-pct-label">0%</span>
+      </div>
+      <div class="gp-bar"><div class="gp-fill" id="global-bar" style="width:0%"></div></div>
+    </div>
+    <nav class="nav">
+      <div class="nav-phase">
+        <div class="nav-phase-label">General</div>
+        <button class="nav-item active" onclick="showPage('overview')">
+          <span class="nav-dot"></span>
+          Vista general
+        </button>
+      </div>
+      <div class="nav-phase">
+        <div class="nav-phase-label">Fase 1 — Infraestructura</div>
+        <button class="nav-item" onclick="showPage('f1a')">
+          <span class="nav-dot"></span>
+          Identidad digital
+          <span class="nav-progress-mini" id="np-f1a">0%</span>
+        </button>
+        <button class="nav-item" onclick="showPage('f1b')">
+          <span class="nav-dot"></span>
+          Plataformas y distribución
+          <span class="nav-progress-mini" id="np-f1b">0%</span>
+        </button>
+        <button class="nav-item" onclick="showPage('f1c')">
+          <span class="nav-dot"></span>
+          Derechos y legal
+          <span class="nav-progress-mini" id="np-f1c">0%</span>
+        </button>
+        <button class="nav-item" onclick="showPage('vault')">
+          <span class="nav-dot"></span>
+          Bóveda de datos
+        </button>
+      </div>
+      <div class="nav-phase">
+        <div class="nav-phase-label">Fase 2 — Redes y contenido</div>
+        <button class="nav-item" onclick="showPage('f2a')">
+          <span class="nav-dot"></span>
+          Campaña expectativa
+          <span class="nav-progress-mini" id="np-f2a">0%</span>
+        </button>
+        <button class="nav-item" onclick="showPage('f2b')">
+          <span class="nav-dot"></span>
+          Redes sociales
+          <span class="nav-progress-mini" id="np-f2b">0%</span>
+        </button>
+        <button class="nav-item" onclick="showPage('f2c')">
+          <span class="nav-dot"></span>
+          Estrategia de contenido
+          <span class="nav-progress-mini" id="np-f2c">0%</span>
+        </button>
+      </div>
+      <div class="nav-phase">
+        <div class="nav-phase-label">Fase 3 — Plataforma</div>
+        <button class="nav-item" onclick="showPage('f3a')">
+          <span class="nav-dot"></span>
+          Sitio web del personaje
+          <span class="nav-progress-mini" id="np-f3a">0%</span>
+        </button>
+        <button class="nav-item" onclick="showPage('f3b')">
+          <span class="nav-dot"></span>
+          Sistema de acceso
+          <span class="nav-progress-mini" id="np-f3b">0%</span>
+        </button>
+        <button class="nav-item" onclick="showPage('f3c')">
+          <span class="nav-dot"></span>
+          Monetización
+          <span class="nav-progress-mini" id="np-f3c">0%</span>
+        </button>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="overview-grid">
+        <div class="stat-card">
+          <div class="stat-label">TAREAS COMPLETADAS</div>
+          <div class="stat-val" id="ov-done">0</div>
+          <div class="stat-sub" id="ov-total">de 0 tareas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">PROGRESO TOTAL</div>
+          <div class="stat-val" id="ov-pct">0%</div>
+          <div class="stat-sub">todas las fases</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">FASES ACTIVAS</div>
+          <div class="stat-val">3</div>
+          <div class="stat-sub">9 subfases</div>
+        </div>
+      </div>
+
+      <div class="section-title">Estado por fase</div>
+
+      <div class="phase-card" onclick="showPage('f1a')">
+        <span class="phase-card-num">FASE 1</span>
+        <div class="phase-card-info">
+          <div class="phase-card-title">Infraestructura</div>
+          <div class="phase-card-sub">Identidad digital · Plataformas · Legal</div>
+        </div>
+        <div class="phase-card-bar-wrap">
+          <div class="phase-card-pct" id="ov-f1-pct">0%</div>
+          <div class="phase-card-bar"><div class="phase-card-bar-fill" id="ov-f1-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="phase-card" onclick="showPage('f2a')">
+        <span class="phase-card-num">FASE 2</span>
+        <div class="phase-card-info">
+          <div class="phase-card-title">Redes y contenido</div>
+          <div class="phase-card-sub">Expectativa · Redes sociales · Contenido</div>
+        </div>
+        <div class="phase-card-bar-wrap">
+          <div class="phase-card-pct" id="ov-f2-pct">0%</div>
+          <div class="phase-card-bar"><div class="phase-card-bar-fill" id="ov-f2-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="phase-card" onclick="showPage('f3a')">
+        <span class="phase-card-num">FASE 3</span>
+        <div class="phase-card-info">
+          <div class="phase-card-title">Plataforma</div>
+          <div class="phase-card-sub">Sitio web · Acceso · Monetización</div>
+        </div>
+        <div class="phase-card-bar-wrap">
+          <div class="phase-card-pct" id="ov-f3-pct">0%</div>
+          <div class="phase-card-bar"><div class="phase-card-bar-fill" id="ov-f3-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F1A: IDENTIDAD DIGITAL -->
+    <div class="page" id="page-f1a">
+      <div class="phase-header">
+        <span class="phase-number">FASE 1 · A</span>
+        <div>
+          <div class="phase-title">Identidad digital</div>
+          <div class="phase-desc">Correo, cuentas base y separación del proyecto</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f1a">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+
+      <div class="subfase" id="sf-f1a-1">
+        <div class="subfase-header" onclick="toggleSf('f1a-1')">
+          <div class="subfase-title">Cuenta Google del personaje</div>
+          <div class="subfase-meta" id="meta-f1a-1">0/4</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f1a-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f1a-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f1a-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Crear Gmail del personaje (nombre.labco@gmail.com)</div>
+                <div class="task-note">Cuenta base — hub de todo el ecosistema. Ya realizado.</div>
+                <span class="task-tag tag-ok">completado</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Verificar acceso a Google Drive, Sheets y YouTube con esa cuenta</div>
+                <div class="task-note">Abrir Drive y confirmar que está disponible desde la cuenta del personaje.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Configurar perfil de Chrome o Firefox separado para el proyecto</div>
+                <div class="task-note">Evitar mezclar sesiones con tu cuenta personal en el mismo navegador.</div>
+                <span class="task-tag tag-warn">privacidad</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Instalar Bitwarden y crear bóveda del proyecto</div>
+                <div class="task-note">bitwarden.com — plan gratuito es suficiente. Guardar todas las credenciales del proyecto aquí.</div>
+                <span class="task-tag tag-info">gestor de contraseñas</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subfase" id="sf-f1a-2">
+        <div class="subfase-header" onclick="toggleSf('f1a-2')">
+          <div class="subfase-title">Google Business Profile</div>
+          <div class="subfase-meta" id="meta-f1a-2">0/3</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f1a-2" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f1a-2">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f1a-2">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Confirmar que Google Business muestra solo el nombre del personaje</div>
+                <div class="task-note">Ya verificado — el perfil muestra el nombre limpio sin el handle del correo.</div>
+                <span class="task-tag tag-ok">verificado</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Completar descripción del proyecto en Business Profile</div>
+                <div class="task-note">Breve bio del personaje — sin datos personales identificables.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Subir logo/imagen del personaje como foto de perfil</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F1B: PLATAFORMAS -->
+    <div class="page" id="page-f1b">
+      <div class="phase-header">
+        <span class="phase-number">FASE 1 · B</span>
+        <div>
+          <div class="phase-title">Plataformas y distribución</div>
+          <div class="phase-desc">Bandcamp · DistroKid · GitHub · Netlify</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f1b">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f1b-1')">
+          <div class="subfase-title">Bandcamp</div>
+          <div class="subfase-meta" id="meta-f1b-1">0/5</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f1b-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f1b-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f1b-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Crear cuenta Bandcamp con el Gmail del personaje</div>
+                <div class="task-note">bandcamp.com → Sign up → Artist/Label</div>
+                <span class="task-tag tag-warn">prioritario</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Configurar perfil: bio del personaje, imagen, links</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Subir primer track o EP con metadatos completos</div>
+                <div class="task-note">Incluir: BPM, mood, instrumentos, uso sugerido — clave para sync.</div>
+                <span class="task-tag tag-info">sync</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Configurar licencias flexibles para uso en videojuegos / sync</div>
+                <div class="task-note">Bandcamp permite agregar licencias Creative Commons o personalizadas por track.</div>
+                <span class="task-tag tag-info">sync</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Vincular cuenta bancaria para recibir pagos</div>
+                <div class="task-note">Los datos bancarios son privados — no aparecen en el perfil público.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f1b-2')">
+          <div class="subfase-title">DistroKid — distribución masiva</div>
+          <div class="subfase-meta" id="meta-f1b-2">0/4</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f1b-2" style="width:0%"></div></div>
+          <span class="chevron-icon" id="chev-f1b-2">›</span>
+        </div>
+        <div class="subfase-body" id="body-f1b-2">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Registrarse en DistroKid — plan Musician ($22/año)</div>
+                <div class="task-note">distrokid.com — con el Gmail del personaje.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Subir tracks listos para distribución en Spotify, Apple Music, etc.</div>
+                <div class="task-note">DistroKid asigna ISRC automáticamente a cada track.</div>
+                <span class="task-tag tag-info">ISRC automático</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Activar YouTube Content ID</div>
+                <div class="task-note">Monetiza automáticamente cualquier video que use tu música en YouTube.</div>
+                <span class="task-tag tag-ok">ingreso pasivo</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Guardar códigos ISRC de cada track en la bóveda</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f1b-3')">
+          <div class="subfase-title">Repositorio GitHub del proyecto</div>
+          <div class="subfase-meta" id="meta-f1b-3">0/3</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f1b-3" style="width:0%"></div></div>
+          <span class="chevron-icon" id="chev-f1b-3">›</span>
+        </div>
+        <div class="subfase-body" id="body-f1b-3">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Crear cuenta GitHub con el Gmail del personaje</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Crear repositorio del proyecto (privado inicialmente)</div>
+                <div class="task-note">Nombre sugerido: [nombre-personaje]-site</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Conectar repo con Netlify para deploy automático</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F1C: DERECHOS -->
+    <div class="page" id="page-f1c">
+      <div class="phase-header">
+        <span class="phase-number">FASE 1 · C</span>
+        <div>
+          <div class="phase-title">Derechos y legal</div>
+          <div class="phase-desc">SAYCO · DNDA · Registros Colombia</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f1c">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f1c-1')">
+          <div class="subfase-title">Registro SAYCO</div>
+          <div class="subfase-meta" id="meta-f1c-1">0/3</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f1c-1" style="width:0%"></div></div>
+          <span class="chevron-icon" id="chev-f1c-1">›</span>
+        </div>
+        <div class="subfase-body" id="body-f1c-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Revisar requisitos de afiliación en sayco.org</div>
+                <div class="task-note">Puedes registrarte con pseudónimo artístico — el nombre real queda en expediente privado.</div>
+                <span class="task-tag tag-warn">Colombia</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Completar afiliación como compositor/autor</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Registrar obras principales en el sistema SAYCO</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f1c-2')">
+          <div class="subfase-title">DNDA — Dirección Nacional de Derecho de Autor</div>
+          <div class="subfase-meta" id="meta-f1c-2">0/3</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f1c-2" style="width:0%"></div></div>
+          <span class="chevron-icon" id="chev-f1c-2">›</span>
+        </div>
+        <div class="subfase-body" id="body-f1c-2">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Acceder al sistema ALDEA — mininterior.gov.co</div>
+                <div class="task-note">Registro gratuito de obras. Genera evidencia con fecha. Puedes hacerlo con pseudónimo.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Registrar primer lote de obras (EP o tracks del primer lanzamiento)</div>
+                <div class="task-note">No es obligatorio antes de publicar — puedes lanzar y registrar en bloque cada 3 meses.</div>
+                <span class="task-tag tag-gray">no urgente</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f1c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Guardar certificados de registro en Google Drive del personaje</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VAULT -->
+    <div class="page" id="page-vault">
+      <div class="phase-header">
+        <span class="phase-number">BÓVEDA</span>
+        <div>
+          <div class="phase-title">Datos del proyecto</div>
+          <div class="phase-desc">Credenciales, códigos, notas sensibles — solo visible localmente</div>
+        </div>
+      </div>
+
+      <div class="vault-section">
+        <div class="vault-header" onclick="toggleVault('creds')">
+          <span class="vault-title">// CREDENCIALES Y ACCESOS</span>
+          <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">click para expandir</span>
+        </div>
+        <div class="vault-body" id="vault-creds">
+          <div class="vault-grid" id="creds-grid"></div>
+          <div class="vault-input-row">
+            <input type="text" id="cred-key" placeholder="plataforma">
+            <input type="text" id="cred-val" placeholder="usuario / contraseña / token">
+            <button onclick="addCred()">+ guardar</button>
+          </div>
+          <p style="font-size:11px;color:var(--text3);margin-top:8px;font-family:var(--mono)">⚠ guardado solo en este navegador (localStorage) — usa Bitwarden para mayor seguridad</p>
+        </div>
+      </div>
+
+      <div class="vault-section">
+        <div class="vault-header" onclick="toggleVault('codes')">
+          <span class="vault-title">// CÓDIGOS E IDENTIFICADORES</span>
+        </div>
+        <div class="vault-body" id="vault-codes">
+          <div class="vault-grid" id="codes-grid"></div>
+          <div class="vault-input-row">
+            <input type="text" id="code-key" placeholder="tipo (ej: ISRC track 1)">
+            <input type="text" id="code-val" placeholder="código">
+            <button onclick="addCode()">+ guardar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="vault-section">
+        <div class="vault-header" onclick="toggleVault('links')">
+          <span class="vault-title">// LINKS DEL PROYECTO</span>
+        </div>
+        <div class="vault-body" id="vault-links">
+          <div class="vault-grid" id="links-grid"></div>
+          <div class="vault-input-row">
+            <input type="text" id="link-key" placeholder="nombre (ej: Bandcamp)">
+            <input type="text" id="link-val" placeholder="URL">
+            <button onclick="addLink()">+ guardar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="vault-section">
+        <div class="vault-header" onclick="toggleVault('notes')">
+          <span class="vault-title">// NOTAS PRIVADAS</span>
+        </div>
+        <div class="vault-body" id="vault-notes">
+          <textarea class="notes-area" id="vault-notes-text" placeholder="notas, decisiones, contactos confidenciales..."></textarea>
+          <button onclick="saveNotes()" style="margin-top:8px">guardar notas</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- F2A: EXPECTATIVA -->
+    <div class="page" id="page-f2a">
+      <div class="phase-header">
+        <span class="phase-number">FASE 2 · A</span>
+        <div>
+          <div class="phase-title">Campaña expectativa</div>
+          <div class="phase-desc">El personaje aparece antes que la música</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f2a">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f2a-1')">
+          <div class="subfase-title">Preparación visual y narrativa</div>
+          <div class="subfase-meta" id="meta-f2a-1">0/4</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f2a-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f2a-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f2a-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Tener imagen del personaje lista en alta resolución</div>
+                <div class="task-note">Mínimo 1080×1080 para redes. Versión transparente (PNG) para el sitio web.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Tener logo en versiones: color, blanco, negro, y versión icono</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Definir bio críptica del personaje — máximo 2 líneas</div>
+                <div class="task-note">Sin contexto geográfico ni institucional. Solo el mundo del personaje.</div>
+                <span class="task-tag tag-warn">anonimato</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Seleccionar 5–8 fragmentos de audio (15–30 seg) para teasers</div>
+                <div class="task-note">Loops, texturas, capas — sin contexto de obra completa todavía.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f2a-2')">
+          <div class="subfase-title">Publicaciones de expectativa</div>
+          <div class="subfase-meta" id="meta-f2a-2">0/3</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f2a-2" style="width:0%"></div></div>
+          <span class="chevron-icon" id="chev-f2a-2">›</span>
+        </div>
+        <div class="subfase-body" id="body-f2a-2">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Publicar primera imagen del personaje — sin audio, sin contexto</div>
+                <div class="task-note">Solo la imagen. Bio mínima. Sin links todavía.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Publicar primer fragmento de audio (Reel / TikTok)</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Mantener cadencia de 1 fragmento cada 3–4 días durante 3 semanas</div>
+                <div class="task-note">Antes del primer lanzamiento oficial. Silencio calculado + fragmentos = intriga.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F2B: REDES -->
+    <div class="page" id="page-f2b">
+      <div class="phase-header">
+        <span class="phase-number">FASE 2 · B</span>
+        <div>
+          <div class="phase-title">Redes sociales</div>
+          <div class="phase-desc">TikTok · Instagram · YouTube · SoundCloud</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f2b">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f2b-1')">
+          <div class="subfase-title">Creación y configuración de cuentas</div>
+          <div class="subfase-meta" id="meta-f2b-1">0/6</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f2b-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f2b-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f2b-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">TikTok — registrar con Gmail del personaje (no con Google login)</div>
+                <div class="task-note">Desactivar sync de contactos y Facebook en configuración de privacidad.</div>
+                <span class="task-tag tag-warn">prioridad 1</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Instagram — registrar con Gmail del personaje</div>
+                <div class="task-note">No vincular con Facebook. Desactivar sincronización de contactos.</div>
+                <span class="task-tag tag-warn">prioridad 2</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">YouTube — crear canal con la cuenta Google del personaje</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">SoundCloud — cuenta con Gmail del personaje</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Subir imagen del personaje y logo como foto de perfil en todas</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Verificar que el handle sea consistente en todas las plataformas</div>
+                <div class="task-note">El mismo nombre en TikTok, Instagram, YouTube y SoundCloud.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F2C: CONTENIDO -->
+    <div class="page" id="page-f2c">
+      <div class="phase-header">
+        <span class="phase-number">FASE 2 · C</span>
+        <div>
+          <div class="phase-title">Estrategia de contenido</div>
+          <div class="phase-desc">Calendario · Hashtags · Nichos</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f2c">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f2c-1')">
+          <div class="subfase-title">Definir estrategia y calendario</div>
+          <div class="subfase-meta" id="meta-f2c-1">0/4</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f2c-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f2c-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f2c-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Definir hashtags propios del personaje (2–3 únicos)</div>
+                <div class="task-note">Construir volumen propio es más valioso que montar tendencias ajenas.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Definir hashtags de nicho: #sounddesign #experimentalmusic #gamemusic</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Armar calendario editorial — mínimo 4 semanas de contenido planificado</div>
+                <div class="task-note">TikTok/IG: 3–4 veces/semana. YouTube: 1 video/mes. SoundCloud: por lanzamiento.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f2c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Identificar 10 curadores de playlists en Spotify para pitchear</div>
+                <div class="task-note">SubmitHub o Groover — playlists de ambient, experimental, game music, sci-fi.</div>
+                <span class="task-tag tag-info">sync</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F3A: SITIO WEB -->
+    <div class="page" id="page-f3a">
+      <div class="phase-header">
+        <span class="phase-number">FASE 3 · A</span>
+        <div>
+          <div class="phase-title">Sitio web del personaje</div>
+          <div class="phase-desc">Hub central — lore, música, contacto sync</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f3a">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f3a-1')">
+          <div class="subfase-title">Arquitectura y diseño</div>
+          <div class="subfase-meta" id="meta-f3a-1">0/5</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f3a-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f3a-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f3a-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Diseñar estructura del sitio: lore, música, sync, comunidad</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Construir HTML base del sitio con estética del personaje</div>
+                <span class="task-tag tag-warn">Claude puede construirlo</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Embeber player de Bandcamp en la sección música</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Formulario de contacto para sync y colaboraciones</div>
+                <div class="task-note">Formspree o Netlify Forms — gratuito, sin backend propio.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3a">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Deploy en Netlify + dominio personalizado (opcional)</div>
+                <div class="task-note">~$12 USD/año en Namecheap o Porkbun.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F3B: ACCESO -->
+    <div class="page" id="page-f3b">
+      <div class="phase-header">
+        <span class="phase-number">FASE 3 · B</span>
+        <div>
+          <div class="phase-title">Sistema de acceso a la comunidad</div>
+          <div class="phase-desc">Códigos únicos · hasta 100 usuarios · escalable</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f3b">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f3b-1')">
+          <div class="subfase-title">Arquitectura del sistema de acceso</div>
+          <div class="subfase-meta" id="meta-f3b-1">0/4</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f3b-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f3b-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f3b-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Diseñar sistema de códigos únicos por usuario (modelo plan de formación)</div>
+                <div class="task-note">Google Sheets como base de datos de códigos. HTML frontend para validación.</div>
+                <span class="task-tag tag-warn">Claude puede construirlo</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Construir página de acceso con validación de código</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Construir área de miembros con descargas de música y audiovisual</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3b">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Sheet de control de usuarios: código, estado, nicho, fecha de acceso</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- F3C: MONETIZACIÓN -->
+    <div class="page" id="page-f3c">
+      <div class="phase-header">
+        <span class="phase-number">FASE 3 · C</span>
+        <div>
+          <div class="phase-title">Monetización</div>
+          <div class="phase-desc">Streaming · Bandcamp · Sync · Content ID · Comunidad</div>
+        </div>
+        <div class="phase-stats">
+          <div class="phase-pct" id="pct-f3c">0%</div>
+          <div class="phase-pct-label">completado</div>
+        </div>
+      </div>
+      <div class="subfase">
+        <div class="subfase-header" onclick="toggleSf('f3c-1')">
+          <div class="subfase-title">Fuentes de ingreso activas</div>
+          <div class="subfase-meta" id="meta-f3c-1">0/5</div>
+          <div class="subfase-bar"><div class="subfase-bar-fill" id="bar-f3c-1" style="width:0%"></div></div>
+          <span class="chevron-icon open" id="chev-f3c-1">›</span>
+        </div>
+        <div class="subfase-body open" id="body-f3c-1">
+          <div class="task-list">
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Activar venta directa en Bandcamp con precios definidos</div>
+                <div class="task-note">Incluir opción "name your price" para tracks individuales — aumenta conversión.</div>
+                <span class="task-tag tag-ok">mejor margen</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Registrarse en Artlist o Musicbed para sync licensing</div>
+                <div class="task-note">Artlist: alta demanda en video/gaming. Musicbed: más selectivo, mejor pago.</div>
+                <span class="task-tag tag-info">sync</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Crear pack de licencia flexible en Bandcamp para developers indie</div>
+                <div class="task-note">"Game music / soundscapes pack" — developers buscan activamente en Bandcamp.</div>
+                <span class="task-tag tag-info">videojuegos</span>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Pitchear tracks a playlists de Spotify vía SubmitHub o Groover</div>
+                <div class="task-note">Playlists objetivo: ambient, experimental, game music, sci-fi sounds.</div>
+              </div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)" data-phase="f3c">
+              <div class="task-check">✓</div>
+              <div class="task-content">
+                <div class="task-title">Evaluar Ko-fi cuando comunidad supere 300 seguidores activos</div>
+                <div class="task-note">Ofrecer stems, patches Pure Data, behind the scenes — sin revelar identidad.</div>
+                <span class="task-tag tag-gray">fase posterior</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'pm_tracker_v1';
+
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+const PHASES = {
+  f1a: ['f1a-1','f1a-2'],
+  f1b: ['f1b-1','f1b-2','f1b-3'],
+  f1c: ['f1c-1','f1c-2'],
+  f2a: ['f2a-1','f2a-2'],
+  f2b: ['f2b-1'],
+  f2c: ['f2c-1'],
+  f3a: ['f3a-1'],
+  f3b: ['f3b-1'],
+  f3c: ['f3c-1']
+};
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => {
+    if (b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'")) b.classList.add('active');
+  });
+}
+
+function toggleSf(id) {
+  const body = document.getElementById('body-' + id);
+  const chev = document.getElementById('chev-' + id);
+  if (body) body.classList.toggle('open');
+  if (chev) chev.classList.toggle('open');
+}
+
+function toggleTask(el) {
+  el.classList.toggle('done');
+  const phase = el.dataset.phase;
+  updateProgress();
+  save();
+}
+
+function updateProgress() {
+  let totalAll = 0, doneAll = 0;
+
+  const phaseGroups = {
+    f1: ['f1a','f1b','f1c'],
+    f2: ['f2a','f2b','f2c'],
+    f3: ['f3a','f3b','f3c']
+  };
+
+  Object.keys(PHASES).forEach(phase => {
+    const tasks = document.querySelectorAll('[data-phase="' + phase + '"]');
+    const done = document.querySelectorAll('[data-phase="' + phase + '"].done');
+    const pct = tasks.length ? Math.round(done.length / tasks.length * 100) : 0;
+
+    const pctEl = document.getElementById('pct-' + phase);
+    if (pctEl) pctEl.textContent = pct + '%';
+
+    const npEl = document.getElementById('np-' + phase);
+    if (npEl) npEl.textContent = pct + '%';
+
+    totalAll += tasks.length;
+    doneAll += done.length;
+
+    PHASES[phase].forEach(sfId => {
+      const sfTasks = document.querySelectorAll('[data-phase="' + phase + '"]');
+      const meta = document.getElementById('meta-' + sfId);
+      const bar = document.getElementById('bar-' + sfId);
+      if (meta) meta.textContent = done.length + '/' + tasks.length;
+      if (bar) bar.style.width = pct + '%';
+    });
+  });
+
+  Object.entries(phaseGroups).forEach(([grp, phases]) => {
+    let t = 0, d = 0;
+    phases.forEach(p => {
+      const tasks = document.querySelectorAll('[data-phase="' + p + '"]');
+      const done = document.querySelectorAll('[data-phase="' + p + '"].done');
+      t += tasks.length; d += done.length;
+    });
+    const pct = t ? Math.round(d / t * 100) : 0;
+    const pctEl = document.getElementById('ov-' + grp + '-pct');
+    const barEl = document.getElementById('ov-' + grp + '-bar');
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+  });
+
+  const globalPct = totalAll ? Math.round(doneAll / totalAll * 100) : 0;
+  document.getElementById('global-bar').style.width = globalPct + '%';
+  document.getElementById('global-pct-label').textContent = globalPct + '%';
+  document.getElementById('ov-done').textContent = doneAll;
+  document.getElementById('ov-total').textContent = 'de ' + totalAll + ' tareas';
+  document.getElementById('ov-pct').textContent = globalPct + '%';
+
+  updateSubfaseBars();
+}
+
+function updateSubfaseBars() {
+  Object.entries(PHASES).forEach(([phase, sfs]) => {
+    sfs.forEach(sfId => {
+      const body = document.getElementById('body-' + sfId);
+      if (!body) return;
+      const tasks = body.querySelectorAll('.task-item');
+      const done = body.querySelectorAll('.task-item.done');
+      const pct = tasks.length ? Math.round(done.length / tasks.length * 100) : 0;
+      const meta = document.getElementById('meta-' + sfId);
+      const bar = document.getElementById('bar-' + sfId);
+      if (meta) meta.textContent = done.length + '/' + tasks.length;
+      if (bar) bar.style.width = pct + '%';
+    });
+  });
+}
+
+function restoreState() {
+  if (!state.tasks) return;
+  state.tasks.forEach(idx => {
+    const all = document.querySelectorAll('.task-item');
+    if (all[idx]) all[idx].classList.add('done');
+  });
+}
+
+function saveTaskState() {
+  const all = document.querySelectorAll('.task-item');
+  state.tasks = [];
+  all.forEach((t, i) => { if (t.classList.contains('done')) state.tasks.push(i); });
+  save();
+}
+
+document.querySelectorAll('.task-item').forEach(t => {
+  t.addEventListener('click', () => { saveTaskState(); updateProgress(); });
+});
+
+function toggleVault(id) {
+  const body = document.getElementById('vault-' + id);
+  if (body) body.classList.toggle('open');
+}
+
+function renderVaultSection(key, gridId) {
+  const items = state[key] || {};
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.innerHTML = Object.entries(items).map(([k, v]) =>
+    '<div class="vault-item"><div class="vault-item-label">' + k + '</div><div class="vault-item-val">' + v + '</div></div>'
+  ).join('');
+}
+
+function addCred() {
+  const k = document.getElementById('cred-key').value.trim();
+  const v = document.getElementById('cred-val').value.trim();
+  if (!k || !v) return;
+  if (!state.creds) state.creds = {};
+  state.creds[k] = v;
+  save(); renderVaultSection('creds','creds-grid');
+  document.getElementById('cred-key').value = '';
+  document.getElementById('cred-val').value = '';
+}
+
+function addCode() {
+  const k = document.getElementById('code-key').value.trim();
+  const v = document.getElementById('code-val').value.trim();
+  if (!k || !v) return;
+  if (!state.codes) state.codes = {};
+  state.codes[k] = v;
+  save(); renderVaultSection('codes','codes-grid');
+  document.getElementById('code-key').value = '';
+  document.getElementById('code-val').value = '';
+}
+
+function addLink() {
+  const k = document.getElementById('link-key').value.trim();
+  const v = document.getElementById('link-val').value.trim();
+  if (!k || !v) return;
+  if (!state.links) state.links = {};
+  state.links[k] = v;
+  save(); renderVaultSection('links','links-grid');
+  document.getElementById('link-key').value = '';
+  document.getElementById('link-val').value = '';
+}
+
+function saveNotes() {
+  state.notes = document.getElementById('vault-notes-text').value;
+  save();
+}
+
+function init() {
+  restoreState();
+  renderVaultSection('creds','creds-grid');
+  renderVaultSection('codes','codes-grid');
+  renderVaultSection('links','links-grid');
+  if (state.notes) document.getElementById('vault-notes-text').value = state.notes;
+  updateProgress();
+}
+
+init();
+</script>
+</body>
+</html>
